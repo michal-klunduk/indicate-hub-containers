@@ -15,8 +15,8 @@ services:
     networks:
       - database
 
-  This service receives aggregated quality indicator results from
-  data providers and answers queries for quality indicator results.
+  # This service receives aggregated quality indicator results from
+  # data providers and answers queries for quality indicator results.
   data-exchange:
     image: ghcr.io/umg-minai/indicate-data-exchange-server:latest
     restart: unless-stopped
