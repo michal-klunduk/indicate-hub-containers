@@ -4,16 +4,16 @@ services:
   # by different data providers.
   database:
     build: database
-    # restart: unless-stopped
-    # shm_size: 128mb
-    # environment: []
-    # secrets: []
-    # volumes:
-    #   - type: volume
-    #     source: data
-    #     target: /var/lib/postgresql
-    # networks:
-    #   - database
+    restart: unless-stopped
+    shm_size: 128mb
+    environment: []
+    secrets: []
+    volumes:
+      - type: volume
+        source: data
+        target: /var/lib/postgresql
+    networks:
+      - database
 
   # This service receives aggregated quality indicator results from
   # data providers and answers queries for quality indicator results.
