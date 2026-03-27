@@ -1,19 +1,67 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - main
 
-pool:
-  vmImage: ubuntu-latest
+variables:
+- group: DockerAppDeployment
+- name: tag
+  value: $(Build.BuildId)
+- name: dockerComposeFile
+  value: '$(Build.SourcesDirectory)/compose.yml'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
+- stage: Build
+  displayName: Build and Push to ACR
+  jobs:
+  - job: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - checkout: self
+    - task: DockerCompose@1
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: $(azureSubscriptionConnection)
+        azureContainerRegistry: $(azureContainerRegistry)
+        dockerComposeFile: $(dockerComposeFile)
+        projectName: $(projectName)
+        action: 'Build services'
+        additionalImageTags: |
+          $(tag)
+          latest
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+
+    - task: DockerCompose@1
+      inputs:
+        containerregistrytype: 'Azure Container Registry'
+        azureSubscription: $(azureSubscriptionConnection)
+        azureContainerRegistry: $(azureContainerRegistry)
+        dockerComposeFile: $(dockerComposeFile)
+        projectName: $(projectName)
+        action: 'Push services'
+        additionalImageTags: |
+          $(tag)
+          latest
+
+- stage: Deploy
+  displayName: Deploy to Azure Container Apps
+  dependsOn: Build
+  jobs:
+  - job: Deploy
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureContainerApps@1
+      displayName: Deploy to Azure Container App
+      inputs:
+        azureSubscription: $(azureSubscriptionConnection)
+        imageToDeploy: $(containerRegistry)/$(frontendRepository):$(tag)
+        containerAppName: $(frontendContainerAppName)
+        resourceGroup: $(resourceGroup)
+
+    - task: AzureContainerApps@1
+      displayName: Deploy to Azure Container App
+      inputs:
+        azureSubscription: $(azureSubscriptionConnection)
+        imageToDeploy: $(containerRegistry)/$(backendRepository):$(tag)
+        containerAppName: $(backendContainerAppName)
+        resourceGroup: $(resourceGroup)
