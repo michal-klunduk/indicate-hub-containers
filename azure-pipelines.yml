@@ -60,7 +60,7 @@ stages:
         imageToDeploy: $(containerRegistry)/$(frontendRepository):$(tag)
         containerAppName: $(frontendContainerAppName)
         resourceGroup: $(resourceGroup)
-        environmentVariables: 'DATABASE_USER=$(POSTGRES_USER) DATABASE_PASSWORD=$(POSTGRES_PASSWORD) DATABASE_HOST=$(backendContainerAppName) DATABASE_POST=$(DATABASE_POST) DATABASE_NAME=$(DATABASE_NAME) DATABASE_SCHEMA=$(DATABASE_SCHEMA)'
+        environmentVariables: 'DATABASE_USER=$(POSTGRES_USER) DATABASE_PASSWORD=$(POSTGRES_PASSWORD) DATABASE_HOST=$(DATABASE_HOST) DATABASE_PORT=$(DATABASE_PORT) DATABASE_NAME=$(DATABASE_NAME) DATABASE_SCHEMA=$(DATABASE_SCHEMA)'
 
     - task: AzureContainerApps@1
       displayName: Deploy to Azure Container App
