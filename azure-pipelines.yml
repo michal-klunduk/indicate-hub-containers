@@ -5,8 +5,10 @@ variables:
 - group: DockerAppDeployment
 - name: tag
   value: $(Build.BuildId)
+# - name: dockerComposeFile
+#   value: '$(Build.SourcesDirectory)/compose.ci.yml'
 - name: dockerComposeFile
-  value: '$(Build.SourcesDirectory)/compose.ci.yml'
+  value: '$(Build.SourcesDirectory)/database/Containerfile'
 
 stages:
 - stage: Build
@@ -17,31 +19,40 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - checkout: self
-    - task: DockerCompose@1
-      inputs:
-        containerregistrytype: 'Azure Container Registry'
-        azureSubscription: $(azureSubscriptionConnection)
-        azureContainerRegistry: $(azureContainerRegistry)
-        dockerComposeFile: $(dockerComposeFile)
-        projectName: $(projectName)
-        action: 'Build services'
-        additionalImageTags: |
-          $(tag)
-          latest
+    # - task: DockerCompose@1
+    #   inputs:
+    #     containerregistrytype: 'Azure Container Registry'
+    #     azureSubscription: $(azureSubscriptionConnection)
+    #     azureContainerRegistry: $(azureContainerRegistry)
+    #     dockerComposeFile: $(dockerComposeFile)
+    #     projectName: $(projectName)
+    #     action: 'Build services'
+    #     additionalImageTags: |
+    #       $(tag)
+    #       latest
 
 
-    - task: DockerCompose@1
+    # - task: DockerCompose@1
+    #   inputs:
+    #     containerregistrytype: 'Azure Container Registry'
+    #     azureSubscription: $(azureSubscriptionConnection)
+    #     azureContainerRegistry: $(azureContainerRegistry)
+    #     dockerComposeFile: $(dockerComposeFile)
+    #     projectName: $(projectName)
+    #     action: 'Push services'
+    #     additionalImageTags: |
+    #       $(tag)
+    #       latest
+    - task: Docker@2
+      displayName: Build and Push Image
       inputs:
-        containerregistrytype: 'Azure Container Registry'
-        azureSubscription: $(azureSubscriptionConnection)
-        azureContainerRegistry: $(azureContainerRegistry)
-        dockerComposeFile: $(dockerComposeFile)
-        projectName: $(projectName)
-        action: 'Push services'
-        additionalImageTags: |
-          $(tag)
-          latest
-          
+        command: buildAndPush
+        tags: latest,$(tag)
+        repository: $(backendRepository)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        Dockerfile: $(dockerfilePath)
+        
+        
     - task: AzureCLI@2
       inputs:
         azureSubscription: $(azureSubscriptionConnection)
