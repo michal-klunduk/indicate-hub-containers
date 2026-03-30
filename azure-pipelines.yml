@@ -7,7 +7,7 @@ variables:
   value: $(Build.BuildId)
 # - name: dockerComposeFile
 #   value: '$(Build.SourcesDirectory)/compose.ci.yml'
-- name: dockerComposeFile
+- name: dockerfilePath
   value: '$(Build.SourcesDirectory)/database/Containerfile'
 
 stages:
