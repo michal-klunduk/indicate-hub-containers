@@ -13,8 +13,7 @@ stages:
   displayName: Build and Push to ACR
   jobs:
   - job: Build
-    pool:
-      vmImage: 'ubuntu-latest'
+    pool: CICD-Agent
     steps:
     - checkout: self
     - task: Docker@2
@@ -46,8 +45,7 @@ stages:
   dependsOn: Build
   jobs:
   - job: Deploy
-    pool:
-      vmImage: 'ubuntu-latest'
+    pool: CICD-Agent
     steps:
     - script: |
         export POSTGRES_PASSWORD=$(openssl rand -base64 12 | tr -dc 'A-Za-z0-9')
