@@ -33,18 +33,8 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           az acr login --name $(containerRegistry)
-          docker pull ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest
-          docker manifest create \
-            $(containerRegistry)/$(frontendRepository):latest \
-            ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest
-          docker manifest annotate \
-            $(containerRegistry)/$(frontendRepository):latest \
-            ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest \
-            --os linux --arch amd64
-          docker manifest push $(containerRegistry)/$(frontendRepository):latest
-          docker tag $(containerRegistry)/$(frontendRepository):latest \
-                    $(containerRegistry)/$(frontendRepository):$(tag)
-          docker push $(containerRegistry)/$(frontendRepository):$(tag)
+          skopeo copy --override-os linux --override-arch amd64 docker://ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest docker://$(containerRegistry)/$(frontendRepository):latest
+          skopeo copy --override-os linux --override-arch amd64 docker://ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest docker://$(containerRegistry)/$(frontendRepository):$(tag)
 
 
 - stage: Deploy
