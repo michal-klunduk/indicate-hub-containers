@@ -52,7 +52,7 @@ stages:
 
     - task: AzureCLI@2
       inputs:
-        azureSubscription: $(azureSubscriptionConnection)
+        azureSubscription: $(azureSubscriptionConnectionProd)
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
