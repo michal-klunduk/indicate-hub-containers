@@ -62,7 +62,7 @@ stages:
       displayName: Push DB Image
       inputs:
         command: push
-        repository: $(containerRegistry)/$(backendRepositor
+        repository: $(containerRegistry)/$(backendRepository)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           latest
