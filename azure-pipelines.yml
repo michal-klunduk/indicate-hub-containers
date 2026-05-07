@@ -38,6 +38,7 @@ stages:
         command: build
         repository: $(backendRepository)
         Dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           latest
           $(tag)
