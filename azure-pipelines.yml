@@ -49,7 +49,7 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          docker image
+          docker images
           defender scan image $(containerRegistry)/$(backendRepository):$(tag) \
             --defender-output $(Build.ArtifactStagingDirectory)/$(backendRepository).sarif \
             --defender-break
