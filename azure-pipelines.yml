@@ -81,8 +81,8 @@ stages:
           docker tag ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest $(containerRegistry)/$(frontendRepository):$(tag)
           docker tag ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest $(containerRegistry)/$(frontendRepository):latest
 
-          docker image
-          defender scan image $(containerRegistry).azurecr.io/$(frontendRepository):$(tag) \
+          docker images
+          defender scan image $(containerRegistry)/$(frontendRepository):$(tag) \
                     --defender-output $(Build.ArtifactStagingDirectory)/$(frontendRepository).sarif \
                     --defender-break
 
