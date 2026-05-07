@@ -36,7 +36,7 @@ stages:
       displayName: Build DB Image
       inputs:
         command: build
-        repository: $(containerRegistry)/$(backendRepository)
+        repository: $(backendRepository)
         Dockerfile: $(dockerfilePath)
         tags: |
           latest
@@ -62,7 +62,7 @@ stages:
       displayName: Push DB Image
       inputs:
         command: push
-        repository: $(containerRegistry)/$(backendRepository)
+        repository: $(backendRepository)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           latest
