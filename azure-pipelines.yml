@@ -17,17 +17,58 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
     - checkout: self
-    - task: Docker@2
-      displayName: Build and Push Image
+    
+    - task: AzureCLI@2
+      displayName: Install Defender CLI
       inputs:
-        command: buildAndPush
-        tags: latest,$(tag)
-        repository: $(backendRepository)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        Dockerfile: $(dockerfilePath)
+        azureSubscription: $(azureSubscriptionConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Downloading Defender CLI..."
+          curl -fL https://aka.ms/defender-cli_linux-x64 -o defender
+          chmod +x defender
+          sudo mv defender /usr/local/bin/defender
+          defender --version
 
+    
+    - task: Docker@2
+      displayName: Build DB Image
+      inputs:
+        command: build
+        repository: $(backendRepository)
+        Dockerfile: $(dockerfilePath)
+        tags: |
+          latest
+          $(tag)
 
     - task: AzureCLI@2
+      displayName: Scan DB Image
+      inputs:
+        azureSubscription: $(azureSubscriptionConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          defender scan image $(containerRegistry).azurecr.io/$(backendRepository):$(tag) \
+            --defender-output $(Build.ArtifactStagingDirectory)/$(backendRepository).sarif \
+            --defender-break
+      env:
+        DEFENDER_TENANT_ID: $(DEFENDER_TENANT_ID)
+        DEFENDER_CLIENT_ID: $(DEFENDER_CLIENT_ID)
+        DEFENDER_CLIENT_SECRET: $(DEFENDER_CLIENT_SECRET)
+
+    - task: Docker@2
+      displayName: Push DB Image
+      inputs:
+        command: push
+        repository: $(backendRepository)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          latest
+          $(tag)
+
+    - task: AzureCLI@2
+      displayName: Scan and Upload to ACR Exchange Image
       inputs:
         azureSubscription: $(azureSubscriptionConnection)
         scriptType: bash
@@ -37,9 +78,25 @@ stages:
           docker pull ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest
           docker tag ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest $(containerRegistry)/$(frontendRepository):$(tag)
           docker tag ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest $(containerRegistry)/$(frontendRepository):latest
+
+          
+          defender scan image $(containerRegistry).azurecr.io/$(frontendRepository):$(tag) \
+                    --defender-output $(Build.ArtifactStagingDirectory)/$(frontendRepository).sarif \
+                    --defender-break
+
+
           docker push $(containerRegistry)/$(frontendRepository):$(tag)
           docker push $(containerRegistry)/$(frontendRepository):latest
-          
+      env:
+        DEFENDER_TENANT_ID: $(DEFENDER_TENANT_ID)
+        DEFENDER_CLIENT_ID: $(DEFENDER_CLIENT_ID)
+        DEFENDER_CLIENT_SECRET: $(DEFENDER_CLIENT_SECRET)
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: $(Build.ArtifactStagingDirectory)
+        ArtifactName: image-vulnerability-scans
+
     - task: Docker@2
       displayName: Build and Push Image
       inputs:
