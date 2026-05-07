@@ -51,7 +51,7 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           docker images
-          defender scan image $(backendRepository):$(tag) \
+          defender scan image $(containerRegistry)/$(backendRepository):$(tag) \
             --defender-output $(Build.ArtifactStagingDirectory)/$(backendRepository).sarif \
             --defender-break
       env:
