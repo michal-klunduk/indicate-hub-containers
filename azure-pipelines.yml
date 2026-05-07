@@ -36,7 +36,7 @@ stages:
       displayName: Build DB Image
       inputs:
         command: build
-        repository: $(backendRepository)
+        repository: $(containerRegistry)/$(backendRepository)
         Dockerfile: $(dockerfilePath)
         tags: |
           latest
@@ -50,7 +50,7 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           docker image
-          defender scan image $(backendRepository):$(tag) \
+          defender scan image $(containerRegistry)/$(backendRepository):$(tag) \
             --defender-output $(Build.ArtifactStagingDirectory)/$(backendRepository).sarif \
             --defender-break
       env:
@@ -62,7 +62,7 @@ stages:
       displayName: Push DB Image
       inputs:
         command: push
-        repository: $(backendRepository)
+        repository: $(containerRegistry)/$(backendRepositor
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           latest
