@@ -119,11 +119,8 @@ stages:
         scriptLocation: inlineScript
         inlineScript: |
           az acr login --name $(containerRegistryProd)
-          docker pull ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest
-          docker tag ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest $(containerRegistryProd)/$(frontendRepository):$(tag)
-          docker tag ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest $(containerRegistryProd)/$(frontendRepository):latest
-          docker push $(containerRegistryProd)/$(frontendRepository):$(tag)
-          docker push $(containerRegistryProd)/$(frontendRepository):latest
+          skopeo copy --override-os linux --override-arch amd64 docker://ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest docker://$(containerRegistryProd)/$(frontendRepository):latest
+          skopeo copy --override-os linux --override-arch amd64 docker://ghcr.io/indicate-eu/benchmarking-data-exchange-server:latest docker://$(containerRegistryProd)/$(frontendRepository):$(tag)
 
 
 - stage: Deploy_nonprod
